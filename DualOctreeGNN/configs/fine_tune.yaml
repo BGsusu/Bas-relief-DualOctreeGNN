@@ -1,0 +1,76 @@
+SOLVER:
+  gpu: 1,
+  run: train
+
+  logdir: logs/shapenet/fine_tune
+  max_epoch: 10
+  test_every_epoch: 20
+  log_per_iter: 50
+  ckpt_num: 40
+
+  # optimizer
+  type: adamw
+  weight_decay: 0.01  # default value of adamw
+  lr: 0.001           # default value of adamw
+
+  # learning rate
+  lr_type: poly
+  step_size: (160,240)
+
+DATA:
+  train:
+    name: shapenet
+
+    # octree building
+    depth: 6
+    offset: 0.0
+    full_depth: 3
+    node_dis: True
+    split_label: True
+
+    # data augmentation, add noise only
+    distort: True
+
+    # data loading
+    location: /home/daipinxuan/bas_relief/AllData/BasRelief/pc_sdf/
+    filelist: /home/daipinxuan/bas_relief/AllData/BasRelief/pc_sdf/train.txt
+    load_sdf: True
+    batch_size: 1
+    shuffle: True
+    # num_workers: 0
+
+  test:
+    name: shapenet
+
+    # octree building
+    depth: 6
+    offset: 0.0
+    full_depth: 3
+    node_dis: True
+    split_label: True
+
+    # data augmentation, add noise only
+    distort: True
+
+    # data loading
+    location: /home/daipinxuan/bas_relief/AllData/BasRelief/pc_sdf/
+    filelist: /home/daipinxuan/bas_relief/AllData/BasRelief/pc_sdf/val.txt
+    batch_size: 1
+    load_sdf: True
+    shuffle: False
+    # num_workers: 0
+
+
+MODEL:
+  name: graph_unet
+
+  depth: 6
+  full_depth: 3
+  depth_out: 6
+  channel: 4
+  nout: 4
+  resblock_type: basic
+
+LOSS:
+  name: shapenet
+  loss_type: sdf_reg_loss

@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"name": "sujianping",
+			"path": "../../../.."
+		}
+	],
+	"settings": {
+		"python.analysis.extraPaths": [
+			"./relief/im-net/IM-NET-pytorch/bas-relief/validator",
+			"./relief/im-net/IM-NET-pytorch/bas-relief"
+		]
+	}
+}

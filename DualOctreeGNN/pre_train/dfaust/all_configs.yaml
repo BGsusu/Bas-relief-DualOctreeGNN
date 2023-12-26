@@ -1,0 +1,134 @@
+DATA:
+  test:
+    adaptive: false
+    angle: &id001
+    - 180
+    - 180
+    - 180
+    batch_size: 4
+    bsphere: sphere
+    center: &id002
+    - -1.0
+    - -1.0
+    - -1.0
+    depth: 8
+    disable: false
+    distort: false
+    filelist: /penwan/dataset/dfaust/test_all.txt
+    full_depth: 3
+    in_memory: false
+    interval: &id003
+    - 1
+    - 1
+    - 1
+    jitter: 0.0
+    load_occu: false
+    load_sdf: true
+    location: /penwan/dataset/dfaust/scans_npy_100k
+    name: pointcloud
+    node_dis: true
+    node_feat: false
+    normal_axis: ''
+    num_workers: 8
+    offset: 0.0
+    point_scale: 0.5
+    radius: -1.0
+    sample_surf_points: false
+    scale: 0.0
+    shuffle: false
+    split_label: true
+    uniform: false
+  train:
+    adaptive: false
+    angle: *id001
+    batch_size: 8
+    bsphere: sphere
+    center: *id002
+    depth: 8
+    disable: false
+    distort: false
+    filelist: /penwan/dataset/dfaust/train_all.txt
+    full_depth: 3
+    in_memory: false
+    interval: *id003
+    jitter: 0.0
+    load_occu: false
+    load_sdf: true
+    location: /penwan/dataset/dfaust/scans_npy_100k
+    name: pointcloud
+    node_dis: true
+    node_feat: false
+    normal_axis: ''
+    num_workers: 8
+    offset: 0.0
+    point_scale: 0.5
+    radius: -1.0
+    sample_surf_points: false
+    scale: 0.0
+    shuffle: false
+    split_label: true
+    uniform: false
+LOSS:
+  label_smoothing: 0.0
+  loss_type: possion_grad_loss
+  name: dfaust
+  num_class: 40
+  weights:
+  - 1.0
+  - 1.0
+MODEL:
+  bottleneck: 4
+  channel: 4
+  depth: 8
+  depth_out: 8
+  dropout:
+  - 0.0
+  factor: 1
+  find_unused_parameters: true
+  full_depth: 3
+  interp: linear
+  name: graph_unet
+  nempty: false
+  nout: 4
+  resblock_num: 3
+  resblock_type: basic
+  sync_bn: false
+  upsample: nearest
+  use_checkpoint: false
+SOLVER:
+  alias: ep600_basic_b8_d8_reg_v1
+  ckpt: ''
+  ckpt_num: 200
+  dist_url: tcp://localhost:10001
+  eval_epoch: 1
+  eval_step: -1
+  gamma: 0.1
+  gpu:
+  - 0
+  - 1
+  - 2
+  - 3
+  log_per_iter: 50
+  logdir: /penwan/logs/dfaust/0115_ep600_basic_b8_d8_reg_v1
+  lr: 0.001
+  lr_power: 0.9
+  lr_type: poly
+  max_epoch: 600
+  progress_bar: false
+  resolution: 128
+  run: train
+  save_sdf: false
+  sdf_scale: 0.9
+  step_size:
+  - 200
+  - 300
+  test_every_epoch: 10
+  type: adamw
+  weight_decay: 0.01
+SYS:
+  cmds: completion.py --config configs/dfaust_d8.yaml SOLVER.gpu 0,1,2,3 SOLVER.logdir
+    /penwan/logs/dfaust/0115 SOLVER.alias ep600_basic_b8_d8_reg_v1 SOLVER.lr_type
+    poly SOLVER.max_epoch 600 SOLVER.progress_bar False MODEL.resblock_type basic
+    DATA.train.batch_size 8 DATA.test.batch_size 4 DATA.train.location /penwan/dataset/dfaust/scans_npy_100k
+    DATA.train.filelist /penwan/dataset/dfaust/train_all.txt DATA.test.location /penwan/dataset/dfaust/scans_npy_100k
+    DATA.test.filelist /penwan/dataset/dfaust/test_all.txt
