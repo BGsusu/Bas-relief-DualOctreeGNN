@@ -1,0 +1,51 @@
+Camera Position: 
+0.000272512 0.829612 0.354802
+Near and Far: 
+-0.694151 2.10306
+Focus center: 
+0.000272512 0.829612 0.0051505
+Range: 
+1.66502
+
+BaseRelief0_0.obj
+camWorldPos: 0.000272512 0.829612 0.354802
+camWorldUp: 0 1 0
+BaseRelief0_1.obj
+camWorldPos: -0.177165 0.829612 0.307403
+camWorldUp: 0 1 0
+BaseRelief0_2.obj
+camWorldPos: -0.354802 0.829612 0.000272497
+camWorldUp: 0 1 0
+BaseRelief0_3.obj
+camWorldPos: -0.307403 0.829612 -0.177165
+camWorldUp: 0 1 0
+BaseRelief0_4.obj
+camWorldPos: -0.000272481 0.829612 -0.354802
+camWorldUp: 0 1 0
+BaseRelief1_0.obj
+camWorldPos: 0.000272512 2.07403 0.354802
+camWorldUp: 0 1 0
+BaseRelief1_1.obj
+camWorldPos: -0.177165 2.07403 0.307403
+camWorldUp: 0 1 0
+BaseRelief1_2.obj
+camWorldPos: -0.354802 2.07403 0.000272497
+camWorldUp: 0 1 0
+BaseRelief1_3.obj
+camWorldPos: -0.307403 2.07403 -0.177165
+camWorldUp: 0 1 0
+BaseRelief1_4.obj
+camWorldPos: -0.000272481 2.07403 -0.354802
+camWorldUp: 0 1 0
+BaseRelief2_0.obj
+camWorldPos: 0.000272512 0 0.354802
+camWorldUp: 0 1 0
+BaseRelief2_2.obj
+camWorldPos: -0.354802 0 0.000272497
+camWorldUp: 0 1 0
+BaseRelief2_3.obj
+camWorldPos: -0.307403 0 -0.177165
+camWorldUp: 0 1 0
+BaseRelief2_4.obj
+camWorldPos: -0.000272481 0 -0.354802
+camWorldUp: 0 1 0

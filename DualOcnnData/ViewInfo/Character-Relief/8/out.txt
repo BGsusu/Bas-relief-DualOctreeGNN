@@ -1,0 +1,15 @@
+Camera Position: 
+0.000272512 0.829612 0.354802
+Near and Far: 
+-0.694151 2.10306
+Focus center: 
+0.000272512 0.829612 0.0051505
+Range: 
+1.66502
+
+BaseRelief0_0.obj
+camWorldPos: -0.000146002 0.88603 0.37211
+camWorldUp: 0 1 0
+BaseRelief0_4.obj
+camWorldPos: 0.000146034 0.88603 -0.37211
+camWorldUp: 0 1 0

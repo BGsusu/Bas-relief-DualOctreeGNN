@@ -136,3 +136,10 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
+
+# dataset
+.obj
+OriginalData/
+BasRelief/
+BasRelief_withoutBG/
+DeprecatedScripts/
