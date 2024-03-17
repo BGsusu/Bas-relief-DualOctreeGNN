@@ -1,0 +1,61 @@
+# --------------------------------------------------------
+# Dual Octree Graph Networks
+# Copyright (c) 2022 Microsoft
+# Licensed under The MIT License [see LICENSE for details]
+# Written by Peng-Shuai Wang
+# --------------------------------------------------------
+
+SOLVER:
+  gpu: 0,
+  run: evaluate
+  # ckpt: logs/ocnn_ae/ae/checkpoints/00300.model.pth
+  ckpt: logs/ae/checkpoints/00300.model.pth
+  alias: eval
+
+  logdir: logs/ocnn_ae_eval/ae_pretrain
+  max_epoch: 300
+  test_every_epoch: 20
+  log_per_iter: 50
+  ckpt_num: 20
+
+  # optimizer
+  type: adamw
+  weight_decay: 0.01  # default value of adamw
+  lr: 0.001           # default value of adamw
+
+  # learning rate
+  lr_type: poly
+  step_size: (160,240)  # milestones
+
+DATA:
+  test:
+    name: bas-relief
+
+    # octree building
+    depth: 6
+    full_depth: 2
+
+    # data augmentation, add noise only
+    distort: False
+
+    # data loading
+    location: /home/sujianping/Bas-relief/Dualocnn/Dataset/bas-relief-dataset/DualOcnnData/dataset
+    model_filelist: /home/sujianping/Bas-relief/Dualocnn/Dataset/bas-relief-dataset/DualOcnnData/dataset/model_val.txt
+    relief_filelist: /home/sujianping/Bas-relief/Dualocnn/Dataset/bas-relief-dataset/DualOcnnData/dataset/relief_val.txt
+    batch_size: 16
+    shuffle: False
+    num_workers: 0
+
+
+MODEL:
+  name: ocnn_ae
+  feature: ND
+  channel: 4
+  depth: 6
+  nout: 4
+  full_depth: 2
+
+  find_unused_parameters: True
+
+LOSS:
+  name: ocnn_ae

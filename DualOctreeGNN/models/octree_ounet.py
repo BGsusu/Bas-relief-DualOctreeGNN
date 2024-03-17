@@ -12,7 +12,7 @@ import torch.nn
 from . import mpu
 
 
-class OctreeOUNet(ocnn.OUNet):
+class OctreeOUNet(ocnn.models.OUNet):
 
   def __init__(self, depth, channel_in, nout, full_depth=2, depth_out=6):
     super().__init__(depth, channel_in, nout, full_depth)

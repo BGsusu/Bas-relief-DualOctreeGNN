@@ -22,7 +22,7 @@ class Transform:
     self.flags = flags
 
     self.point_scale = flags.point_scale
-    self.points2octree = ocnn.Points2Octree(**flags)
+    self.points2octree = ocnn.Point2Octree(**flags)
 
   def __call__(self, points, idx):
     # After normalization, the points are in [-1, 1]

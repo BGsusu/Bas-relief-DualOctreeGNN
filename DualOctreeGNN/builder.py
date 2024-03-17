@@ -17,6 +17,7 @@ def get_model(flags):
             flags.full_depth, flags.depth_out]
   if flags.name == 'graph_ounet' or \
      flags.name == 'graph_unet' or \
+     flags.name == 'bas_relief_ounet' or \
      flags.name == 'graph_ae':
     params.append(flags.resblock_type)
     params.append(flags.bottleneck)
@@ -51,6 +52,14 @@ def get_model(flags):
     model = models.graph_unet.GraphUNet(*params)
   elif flags.name == 'graph_ae':
     model = models.graph_ae.GraphAE(*params)
+  elif flags.name == 'bas_relief_ounet':
+    model = models.bas_relief_ounet.BasReliefOUNet(*params)
+  elif flags.name == 'ocnn_ae':
+    params = [flags.channel, flags.nout, flags.depth,flags.full_depth]
+    model = models.ocnn_ae.OCNNAutoEncoder(*params)
+  elif flags.name == 'ocnn_ounet':
+    params = [flags.channel, flags.nout, flags.depth,flags.full_depth, flags.feature]
+    model = models.ocnn_ounet.OCNNOUNet(*params)
   else:
     raise ValueError
   return model
@@ -76,16 +85,21 @@ def get_dataset(flags):
     return datasets.get_pointcloud_eval_dataset(flags)
   elif flags.name.lower() == 'synthetic_room':
     return datasets.get_synthetic_room_dataset(flags)
+  elif flags.name.lower() == 'bas-relief':
+    return datasets.get_bas_relief_dataset(flags)
   else:
     raise ValueError
 
 
 def get_classification_model(flags):
   if flags.name.lower() == 'lenet':
-    model = ocnn.LeNet(flags.depth, flags.channel, flags.nout)
+    # model = ocnn.LeNet(flags.depth, flags.channel, flags.nout)
+    model = ocnn.models.LeNet(flags.channel, flags.nout, flags.depth)
   elif flags.name.lower() == 'resnet':
-    model = ocnn.ResNet(flags.depth, flags.channel, flags.nout,
-                        flags.resblock_num)
+    # model = ocnn.ResNet(flags.depth, flags.channel, flags.nout,
+    #                     flags.resblock_num)
+    model = ocnn.models.ResNet(flags.channel, flags.nout,
+                        flags.resblock_num, flags.depth)
   elif flags.name.lower() == 'graphlenet':
     model = models.graph_lenet.GraphLeNet(
         flags.depth, flags.channel, flags.nout)
@@ -107,5 +121,7 @@ def get_loss_function(flags):
     return losses.dfaust_loss
   elif flags.name.lower() == 'synthetic_room':
     return losses.synthetic_room_loss
+  elif flags.name.lower() == 'ocnn_ae':
+    return losses.ocnn_ae_compute_loss
   else:
     raise ValueError

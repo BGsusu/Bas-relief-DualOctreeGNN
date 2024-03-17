@@ -17,24 +17,65 @@ class DualOctree:
     # prime octree
     self.octree = octree
     self.device = octree.device
-    self.depth = ocnn.octree_property(octree, 'depth').item()
-    self.full_depth = ocnn.octree_property(octree, 'full_depth').item()
-    self.batch_size = ocnn.octree_property(octree, 'batch_size').item()
+    # self.depth = ocnn.octree_property(octree, 'depth').item()
+    # self.full_depth = ocnn.octree_property(octree, 'full_depth').item()
+    # self.batch_size = ocnn.octree_property(octree, 'batch_size').item()
+    self.depth = octree.depth
+    self.full_depth = octree.full_depth
+    self.batch_size = octree.batch_size
 
     # node numbers
-    self.nnum = ocnn.octree_property(octree, 'node_num')
-    self.nenum = ocnn.octree_property(octree, 'node_num_ne')
-    self.ncum = ocnn.octree_property(octree, 'node_num_cum')
-    self.lnum = self.nnum - self.nenum  # leaf node numbers
+    # self.nnum = ocnn.octree_property(octree, 'node_num')
+    # self.nenum = ocnn.octree_property(octree, 'node_num_ne')
+    # self.ncum = ocnn.octree_property(octree, 'node_num_cum')
+    self.nnum = octree.nnum
+    self.nenum = octree.nnum_nempty
+    self.ncum = ocnn.utils.cumsum(octree.nnum, dim=0, exclusive=True)
+    self.lnum = self.nnum - self.nenum  # leaf node numbers.67
 
     # node properties
-    xyzi = ocnn.octree_property(octree, 'xyz')
-    self.xyzi = ocnn.octree_decode_key(xyzi)
-    self.xyz = self.xyzi[:, :3]
-    self.batch = self.xyzi[:, 3]
+    # xyzi = ocnn.octree_property(octree, 'xyz')
+    # self.xyzi = ocnn.octree_decode_key(xyzi)
+    
+    #octree_keys = torch.cat(octree.keys)
+    keys_new = []
+    for i in range(len(octree.keys)):
+      if octree.keys[i]!=None:
+        keys_new.append(octree.keys[i])
+    octree_keys = torch.cat(keys_new)
+    
+    x,y,z,b = ocnn.octree.key2xyz(octree_keys)
+    self.xyz = torch.stack([x, y, z], dim=1)
+    self.batch = b
+    
+    # x,y,z,b = octree.xyzb(self.depth)
+    # self.xyz = torch.stack([x, y, z], dim=1)
+    # self.batch = b
+    
     self.node_depth = self._node_depth()
-    self.child = ocnn.octree_property(octree, 'child')
-    self.key = ocnn.octree_property(octree, 'key')
+    # self.child = ocnn.octree_property(octree, 'child')
+    # self.key = ocnn.octree_property(octree, 'key')
+    child_new = []
+    for i in range(len(octree.children)):
+      if octree.children[i]!=None:
+        child_new.append(octree.children[i])
+    self.child = torch.cat(child_new)
+    
+    
+    #octree_keys = torch.cat(octree.keys)
+    keys_new = []
+    for i in range(len(octree.keys)):
+      if octree.keys[i]!=None:
+        keys_new.append(octree.keys[i])
+    self.key = torch.cat(keys_new)
+    
+    print('==============')
+    print(self.child)
+    print(self.child.shape)
+    print(self.key)
+    print(self.key.shape)
+    print('==============')
+    
     self.keyd = self.key | (self.node_depth << 58)
 
     # build lookup tables
@@ -90,17 +131,20 @@ class DualOctree:
     bnd = 2 ** depth
     num = bnd ** 3
 
-    ki = torch.arange(0, num, dtype=torch.int64, device=self.device)
-    xi = ocnn.octree_key2xyz(ki, depth)
-    xi = ocnn.octree_decode_key(xi)[:, :3]
+    ki = torch.arange(num, dtype=torch.int64, device=self.device)
+    # xi = ocnn.octree_key2xyz(ki, depth)
+    # xi = ocnn.octree_decode_key(xi)[:, :3]
+    xi, yi, zi, bi = ocnn.octree.key2xyz(ki,depth)
+    xi = torch.stack([xi, yi, zi], dim=-1) #[N, 3]
     xj = xi.unsqueeze(1) + self.ngh    # [N, K, 3]
 
     row = ki.unsqueeze(1).repeat(1, K).view(-1)
     zj = torch.zeros(num, K, 1, dtype=torch.int16, device=self.device)
     kj = torch.cat([xj, zj], dim=-1).view(-1, 4)
-    kj = ocnn.octree_encode_key(kj)
     # for full octree, the octree key is the index
-    col = ocnn.octree_xyz2key(kj, depth)
+    # kj = ocnn.octree_encode_key(kj)
+    # col = ocnn.octree_xyz2key(kj, depth)
+    col = ocnn.octree.xyz2key(kj[:, 0], kj[:, 1], kj[:, 2], kj[:, 3], depth = depth)
 
     valid = torch.logical_and(xj > -1, xj < bnd)  # out-of-bound
     valid = torch.all(valid, dim=-1).view(-1)
@@ -165,6 +209,10 @@ class DualOctree:
     # mark invalid nodes of layer (depth-1)
     edge_idx, edge_dir = graph['edge_idx'], graph['edge_dir']
     row, col = edge_idx[0], edge_idx[1]
+    print('=============')
+    print(self.child.shape)
+    print(row.shape)
+    print('=============')
     valid_row = self.child[row] < 0
     valid_col = self.child[col] < 0
     invalid_row = torch.logical_not(valid_row)
@@ -234,6 +282,10 @@ class DualOctree:
       leaf_d = torch.ones(self.nnum[d], dtype=torch.bool, device=self.device)
       mask = torch.cat([leaf_nodes[:self.ncum[d]], leaf_d], dim=0)
       remap = torch.cumsum(mask.long(), dim=0) - 1
+      # print(self.graph[d]['edge_idx'].shape)
+      # # torch.set_printoptions(threshold=float('inf'))
+      # print(self.graph[d]['edge_idx'])
+      # print(remap.shape)
       self.graph[d]['edge_idx'] = remap[self.graph[d]['edge_idx']]
 
   def filter_multiple_level_edges(self):
@@ -308,8 +360,19 @@ class DualOctree:
 
   def get_input_feature(self, all_leaf_nodes=True):
     # the initial feature of leaf nodes in the layer self.depth
-    data = ocnn.octree_property(self.octree, 'feature', self.depth)
-    data = data.squeeze(0).squeeze(-1).t()
+
+    # data = ocnn.octree_property(self.octree, 'feature', self.depth)
+    
+    # data = self.octree.get_input_feature()
+    
+    octree_feature = ocnn.modules.InputFeature('ND', nempty=False)
+    data = octree_feature(self.octree)
+    
+    #print('==========')
+    #print(data.shape)
+    #data = data.squeeze(0).squeeze(-1).t()
+    #print('==========')
+    #print(data.shape)
 
     # the initial feature of leaf nodes in other layers
     if all_leaf_nodes:
@@ -319,7 +382,8 @@ class DualOctree:
 
       # concat zero features with the initial features in layer depth
       data = torch.cat([zeros, data], dim=0)
-
+    #print('==========')
+    #print(data.shape)
     return data
 
   def add_node_keyd(self):
@@ -327,7 +391,8 @@ class DualOctree:
     for d in range(self.full_depth, self.depth + 1):
       keyd = self._node_property(self.keyd, d)
       leaf_mask = self._node_property(self.child, d) < 0
-      keyd1.append(keyd[leaf_mask])
+      keyd_mask = keyd[leaf_mask]
+      keyd1.append(keyd_mask)
       keyd2.append(keyd)
       self.graph[d]['keyd'] = torch.cat(keyd1[:-1] + keyd2[-1:], dim=0)
 
@@ -380,12 +445,12 @@ class DualOctree:
       np.save(filename + "edge_%d.npy" % d, edge_idx.t().cpu().numpy())
 
 
-if __name__ == '__main__':
-  octrees = ocnn.octree_samples(['octree_1', 'octree_2'])
-  octree = ocnn.octree_batch(octrees).cuda()
-  pdoctree = DualOctree(octree)
-  pdoctree.save('data/batch_12_')
-  pdoctree.add_self_loops()
-  pdoctree.calc_edge_type()
-  pdoctree.remap_node_idx()
-  print('succ!')
+# if __name__ == '__main__':
+#   octrees = ocnn.octree_samples(['octree_1', 'octree_2'])
+#   octree = ocnn.octree_batch(octrees).cuda()
+#   pdoctree = DualOctree(octree)
+#   pdoctree.save('data/batch_12_')
+#   pdoctree.add_self_loops()
+#   pdoctree.calc_edge_type()
+#   pdoctree.remap_node_idx()
+#   print('succ!')

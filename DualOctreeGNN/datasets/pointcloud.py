@@ -22,7 +22,7 @@ class Transform:
     self.octant_sample_num = 2
     self.point_sample_num = flags.point_sample_num
     self.point_scale = flags.point_scale
-    self.points2octree = ocnn.Points2Octree(**flags)
+    self.points2octree = ocnn.Point2Octree(**flags)
 
   def build_octree(self, points):
     pts, normals = points[:, :3], points[:, 3:]

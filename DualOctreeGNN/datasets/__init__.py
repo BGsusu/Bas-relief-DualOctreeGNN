@@ -9,3 +9,4 @@ from .shapenet import get_shapenet_dataset
 from .pointcloud import get_pointcloud_dataset, get_singlepointcloud_dataset
 from .pointcloud_eval import get_pointcloud_eval_dataset
 from .synthetic_room import get_synthetic_room_dataset
+from .basrelief import get_bas_relief_dataset

@@ -27,7 +27,7 @@ class TransformScene(TransformShape):
     self.points_scale = 0.6  # the points are actually in [-0.55, 0.55]
     self.noise_std = 0.005
     self.pos_weight = 10
-    self.points2octree = ocnn.Points2Octree(**flags)
+    self.points2octree = ocnn.Point2Octree(**flags)
 
   def sample_occu(self, sample):
     points, occus = sample['points'], sample['occupancies']

@@ -1,0 +1,87 @@
+# --------------------------------------------------------
+# Dual Octree Graph Networks
+# Copyright (c) 2022 Microsoft
+# Licensed under The MIT License [see LICENSE for details]
+# Written by Peng-Shuai Wang
+# --------------------------------------------------------
+
+SOLVER:
+  gpu: 0,
+  run: train
+
+  logdir: logs/bas-relief/graph_ounet
+  max_epoch: 300
+  test_every_epoch: 20
+  log_per_iter: 50
+  ckpt_num: 20
+
+  # optimizer
+  type: adamw
+  weight_decay: 0.01  # default value of adamw
+  lr: 0.001           # default value of adamw
+
+  # learning rate
+  lr_type: poly
+  step_size: (160,240)
+
+DATA:
+  train:
+    name: bas-relief
+
+    # octree building
+    depth: 8
+    offset: 0.0
+    full_depth: 3
+    node_dis: True
+    split_label: True
+
+    # data augmentation, add noise only
+    distort: False
+
+    # data loading
+    location: /home/sujianping/Bas-relief/Dualocnn/Dataset/bas-relief-dataset/DualOcnnData/dataset
+    model_filelist: /home/sujianping/Bas-relief/Dualocnn/Dataset/bas-relief-dataset/DualOcnnData/dataset/model_train.txt
+    relief_filelist: /home/sujianping/Bas-relief/Dualocnn/Dataset/bas-relief-dataset/DualOcnnData/dataset/relief_train.txt
+    load_sdf: True
+    batch_size: 4
+    shuffle: True
+    num_workers: 4
+
+  test:
+    name: bas-relief
+
+    # octree building
+    depth: 8
+    offset: 0.0
+    full_depth: 3
+    node_dis: True
+    split_label: True
+
+    # data augmentation, add noise only
+    distort: False
+
+    # data loading
+    location: /home/sujianping/Bas-relief/Dualocnn/Dataset/bas-relief-dataset/DualOcnnData/dataset
+    model_filelist: /home/sujianping/Bas-relief/Dualocnn/Dataset/bas-relief-dataset/DualOcnnData/dataset/model_val.txt
+    relief_filelist: /home/sujianping/Bas-relief/Dualocnn/Dataset/bas-relief-dataset/DualOcnnData/dataset/relief_val.txt
+    batch_size: 1
+    load_sdf: False
+    shuffle: False
+    # num_workers: 4
+
+
+MODEL:
+  name: bas_relief_ounet
+
+  channel: 4
+  depth: 8
+  nout: 4
+  depth_out: 8
+  full_depth: 3
+  bottleneck: 4
+  resblock_type: basic
+  feature: ND
+
+LOSS:
+  name: shapenet
+  loss_type: sdf_reg_loss

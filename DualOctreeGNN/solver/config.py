@@ -27,26 +27,36 @@ _C.SOLVER.ckpt_num          = 10         # The number of checkpoint kept
 
 _C.SOLVER.type              = 'sgd'      # Choose from sgd or adam
 _C.SOLVER.weight_decay      = 0.0005     # The weight decay on model weights
+_C.SOLVER.clip_grad         = -1.0       # Clip gradient norm (-1: disable)
 _C.SOLVER.max_epoch         = 300        # Maximum training epoch
 _C.SOLVER.eval_epoch        = 1          # Maximum evaluating epoch
+_C.SOLVER.warmup_epoch      = 20         # The warmup epoch number
+_C.SOLVER.warmup_init       = 0.001      # The initial ratio of the warmup
 _C.SOLVER.eval_step         = -1         # Maximum evaluating steps
 _C.SOLVER.test_every_epoch  = 10         # Test model every n training epochs
 _C.SOLVER.log_per_iter      = -1         # Output log every k training iteration
 
 _C.SOLVER.lr_type           = 'step'     # Learning rate type: step or cos
 _C.SOLVER.lr                = 0.1        # Initial learning rate
+_C.SOLVER.lr_min            = 0.0001     # The minimum learning rate
 _C.SOLVER.gamma             = 0.1        # Learning rate step-wise decay
-_C.SOLVER.step_size         = (120,60,)  # Learning rate step size.
+_C.SOLVER.step_size         = (120,180,)  # Learning rate step size.
 _C.SOLVER.lr_power          = 0.9        # Used in poly learning rate
 
 _C.SOLVER.dist_url          = 'tcp://localhost:10001'
 _C.SOLVER.progress_bar      = True
+_C.SOLVER.rand_seed         = -1         # Fix the random seed if larger than 0
+_C.SOLVER.empty_cache       = True       # Empty cuda cache periodically
+
+_C.SOLVER.best_val          = 'min:loss'
 
 
 # DATA related parameters
-_C.DATA = CN()
-_C.DATA.train = CN()
+_C.DATA = CN(new_allowed=True)
+_C.DATA.train = CN(new_allowed=True)
 _C.DATA.train.name          = ''          # The name of the dataset
+_C.DATA.train.disable       = False       # Disable this dataset or not
+_C.DATA.train.pin_memory    = True
 
 # For octree building
 # If node_dis = True and there are normals, the octree features
@@ -60,6 +70,9 @@ _C.DATA.train.node_dis      = False       # Save the node displacement
 _C.DATA.train.split_label   = False       # Save the split label
 _C.DATA.train.adaptive      = False       # Build the adaptive octree
 _C.DATA.train.node_feat     = False       # Calculate the node feature
+
+# For transformation
+_C.DATA.train.orient_normal = ''          # Used to re-orient normal directions
 
 # For normalization
 # If radius < 0, then the method will compute a bounding sphere
@@ -79,21 +92,27 @@ _C.DATA.train.uniform       = False       # Generate uniform scales
 _C.DATA.train.jitter        = 0.0         # Jitter the points
 _C.DATA.train.interval      = (1, 1, 1)   # Use interval&angle to generate random angle
 _C.DATA.train.angle         = (180, 180, 180)
+_C.DATA.train.flip          = (0.0, 0.0, 0.0)
 
 # For data loading
 _C.DATA.train.location      = ''          # The data location
 _C.DATA.train.filelist      = ''          # The data filelist
+_C.DATA.train.model_filelist      = ''          # The data filelist
+_C.DATA.train.relief_filelist      = ''          # The data filelist
+_C.DATA.train.take          = -1          # Number of samples used for training
 _C.DATA.train.batch_size    = 32          # Training data batch size
-_C.DATA.train.num_workers   = 8           # Number of workers to load the data
+_C.DATA.train.num_workers   = 4           # Number of workers to load the data
 _C.DATA.train.shuffle       = False       # Shuffle the input data
 _C.DATA.train.in_memory     = False       # Load the training data into memory
 
+_C.DATA.train.points_scale = 128
 
 _C.DATA.test = _C.DATA.train.clone()
+_C.DATA.test.num_workers    = 2
 
 
 # MODEL related parameters
-_C.MODEL = CN()
+_C.MODEL = CN(new_allowed=True)
 _C.MODEL.name               = ''          # The name of the model
 _C.MODEL.depth              = 5           # The input octree depth
 _C.MODEL.full_depth         = 2           # The input octree full depth layer
@@ -113,8 +132,10 @@ _C.MODEL.sync_bn            = False       # Use sync_bn when training the networ
 _C.MODEL.use_checkpoint     = False       # Use checkpoint to save memory
 _C.MODEL.find_unused_parameters = False   # Used in DistributedDataParallel
 
+_C.MODEL.feature            = 'ND'
+
 # loss related parameters
-_C.LOSS = CN()
+_C.LOSS = CN(new_allowed=True)
 _C.LOSS.name                = ''          # The name of the loss
 _C.LOSS.num_class           = 40          # The class number for the cross-entropy loss
 _C.LOSS.weights             = (1.0, 1.0)  # The weight factors for different losses
@@ -122,8 +143,9 @@ _C.LOSS.label_smoothing     = 0.0         # The factor of label smoothing
 
 
 # backup the commands
-_C.SYS = CN()
+_C.SYS = CN(new_allowed=True)
 _C.SYS.cmds              = ''             # Used to backup the commands
+
 
 FLAGS = _C
 

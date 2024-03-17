@@ -12,3 +12,6 @@ from . import graph_ounet
 from . import graph_slounet
 from . import graph_unet
 from . import graph_ae
+from . import bas_relief_ounet
+from . import ocnn_ae
+from . import ocnn_ounet

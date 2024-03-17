@@ -98,6 +98,9 @@ class GraphConv(torch.nn.Module):
     if has_node_type and self.n_node_type > 1:
       # concatenate the one_hot vector
       one_hot = F.one_hot(node_type, num_classes=self.n_node_type)
+      #print(one_hot.shape)
+      #print('++++++++')
+      #print(x.shape)
       x = torch.cat([x, one_hot], dim=1)
 
     # x -> col_data
@@ -187,7 +190,8 @@ class Conv1x1BnRelu(torch.nn.Module):
     out = self.bn(out)
     out = self.relu(out)
     return out
-#增加了一个兼容视角的类
+#增加了一个兼容视角的�?
+
 class Conv1x1BnRelu_ViewPos(torch.nn.Module):
 
   def __init__(self, channel_in, channel_out):

@@ -5,4 +5,4 @@
 # Written by Peng-Shuai Wang
 # --------------------------------------------------------
 
-from .loss import shapenet_loss, dfaust_loss, synthetic_room_loss
+from .loss import shapenet_loss, dfaust_loss, synthetic_room_loss, ocnn_ae_compute_loss

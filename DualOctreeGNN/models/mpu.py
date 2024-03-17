@@ -53,11 +53,12 @@ def octree_linear_pts(octree, depth, pts):
   corners = xyzi.unsqueeze(1) + mask     # (N, 8, 3)
   coordsf = xyzf.unsqueeze(1) - corners  # (N, 8, 3), in [-1.0, 1.0]
 
-  # coorers -> key
+  # corners -> key
   ids = ids.detach().repeat(1, kNN).unsqueeze(-1)       # (N, 8, 1)
   key = torch.cat([corners, ids], dim=-1).view(-1, 4).short()  # (N*8, 4)
-  key = ocnn.octree_encode_key(key).long()                     # (N*8, )
-  idx = ocnn.octree_search_key(key, octree, depth, key_is_xyz=True)
+  # key = ocnn.octree_encode_key(key).long()                     # (N*8, )
+  # idx = ocnn.octree_search_key(key, octree, depth, key_is_xyz=True)
+  idx = octree.search_xyzb(key, depth)
 
   # corners -> flags
   valid = torch.logical_and(corners > -1, corners < scale)  # out-of-bound
@@ -85,7 +86,8 @@ def octree_linear_pts(octree, depth, pts):
 def get_linear_pred(pts, octree, shape_code, neighs, depth_start, depth_end):
   npt = pts.size(0)
   indices, weights, xyzfs = [], [], []
-  nnum_cum = ocnn.octree_property(octree, 'node_num_cum')
+  # nnum_cum = ocnn.octree_property(octree, 'node_num_cum')
+  nnum_cum = ocnn.utils.cumsum(octree.nnum, dim=0, exclusive=True)
   ids = torch.arange(npt, device=pts.device, dtype=torch.long)
   ids = ids.unsqueeze(-1).repeat(1, kNN).view(-1)
   for d in range(depth_start, depth_end+1):
@@ -97,7 +99,8 @@ def get_linear_pred(pts, octree, shape_code, neighs, depth_start, depth_end):
     idsd = ids[valid]
 
     if d < depth_end:
-      child = ocnn.octree_property(octree, 'child', d)
+      # child = ocnn.octree_property(octree, 'child', d)
+      child = octree.children[d]
       leaf = child[idxd] < 0  # keep only leaf nodes
       idsd, idxd, weightd, xyzfd = idsd[leaf], idxd[leaf], weightd[leaf], xyzfd[leaf]
 

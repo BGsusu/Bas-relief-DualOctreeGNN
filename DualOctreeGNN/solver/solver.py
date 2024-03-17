@@ -154,7 +154,7 @@ class Solver:
 
     data_loader = torch.utils.data.DataLoader(
         dataset, batch_size=flags.batch_size, num_workers=flags.num_workers,
-        sampler=sampler, collate_fn=collate_fn, pin_memory=True)
+        sampler=sampler, collate_fn=collate_fn, pin_memory=False)
     return data_loader
 
   def config_model(self):
@@ -230,7 +230,8 @@ class Solver:
       self.optimizer.zero_grad()
 
       # forward
-      batch = self.train_iter.next()
+      # batch = self.train_iter.next()
+      batch = next(self.train_iter)
       batch['iter_num'] = it
       batch['epoch'] = epoch
 
@@ -260,7 +261,7 @@ class Solver:
     rng = range(len(self.test_loader))
     for it in tqdm(rng, ncols=80, leave=False, disable=self.disable_tqdm):
       # forward
-      batch = self.test_iter.next()
+      batch = next(self.test_iter)
       batch['iter_num'] = it
       batch['epoch'] = epoch
       # with torch.no_grad():
@@ -281,7 +282,7 @@ class Solver:
     if eval_step < 1:
       eval_step = len(self.test_loader)
     for it in tqdm(range(eval_step), ncols=80, leave=False):
-      batch = self.test_iter.next()
+      batch = next(self.test_iter)
       batch['iter_num'] = it
       batch['epoch'] = epoch
       with torch.no_grad():

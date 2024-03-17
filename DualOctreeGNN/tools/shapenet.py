@@ -227,7 +227,7 @@ def sample_sdf():
     points = ocnn.points_new(
         torch.from_numpy(points), torch.from_numpy(normals),
         torch.Tensor(), torch.Tensor())
-    octree2points = ocnn.Points2Octree(depth=depth, full_depth=full_depth)
+    octree2points = ocnn.Point2Octree(depth=depth, full_depth=full_depth)
     octree = octree2points(points)
 
     # sample points and grads according to the xyz

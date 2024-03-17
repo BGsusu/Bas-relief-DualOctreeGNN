@@ -93,8 +93,9 @@ def compute_octree_loss(logits, octree_out):
   output = dict()
   for d in logits.keys():
     logitd = logits[d]
-    label_gt = ocnn.octree_property(octree_out, 'split', d).long()
-    output['loss_%d' % d] = F.cross_entropy(logitd, label_gt) * weights[d]
+    # label_gt = ocnn.octree_property(octree_out, 'split', d).long()
+    label_gt = octree_out.nempty_mask(d)
+    output['loss_%d' % d] = F.cross_entropy(logitd, label_gt.long()) * weights[d]
     output['accu_%d' % d] = logitd.argmax(1).eq(label_gt).float().mean()
   return output
 
@@ -277,3 +278,29 @@ def synthetic_room_loss(batch, model_out, reg_loss_type=''):
   output.update(occu_loss)
 
   return output
+
+
+def ocnn_ae_compute_loss(octree: ocnn.octree.Octree, model_out: dict):
+  # octree splitting loss
+  output = dict()
+  logits = model_out['logits']
+  for d in logits.keys():
+    logitd = logits[d]
+    label_gt = octree.nempty_mask(d).long()
+    output['loss_%d' % d] = F.cross_entropy(logitd, label_gt)
+    output['accu_%d' % d] = logitd.argmax(1).eq(label_gt).float().mean()
+
+  # octree regression loss
+  signal = model_out['signal']
+  signal_gt = get_ground_truth_signal(octree)
+  output['loss_reg'] = torch.mean(torch.sum((signal_gt - signal)**2, dim=1))
+
+  # total loss
+  losses = [val for key, val in output.items() if 'loss' in key]
+  output['loss'] = torch.sum(torch.stack(losses))
+  return output
+
+def get_ground_truth_signal(octree):
+  octree_feature = ocnn.modules.InputFeature('ND', nempty=True)
+  data = octree_feature(octree)
+  return data

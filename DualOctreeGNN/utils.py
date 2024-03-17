@@ -6,6 +6,7 @@
 # --------------------------------------------------------
 
 # autopep8: off
+import os
 import ocnn
 import torch
 import torch.autograd
@@ -172,8 +173,8 @@ def calc_chamfer(filename_gt, filename_pred, point_num):
 
 
 def points2ply(filename, points, scale=1.0):
-  xyz = ocnn.points_property(points, 'xyz')
-  normal = ocnn.points_property(points, 'normal')
+  xyz = points[0:3]
+  normal = points[3:6]
   has_normal = normal is not None
   xyz = xyz.numpy() * scale
   if has_normal: normal = normal.numpy()
@@ -196,3 +197,31 @@ def points2ply(filename, points, scale=1.0):
 
   # write ply
   PlyData([el]).write(filename)
+
+def save_points_to_ply(filename: str, points: np.ndarray,
+                       normals = None,
+                       colors = None,
+                       labels = None,
+                       text: bool = False):
+
+  point_cloud = [points]
+  point_cloud_types = [('x', 'f4'), ('y', 'f4'), ('z', 'f4')]
+  if normals is not None:
+    point_cloud.append(normals)
+    point_cloud_types += [('nx', 'f4'), ('ny', 'f4'), ('nz', 'f4')]
+  if colors is not None:
+    point_cloud.append(colors)
+    point_cloud_types += [('red', 'u1'), ('green', 'u1'), ('blue', 'u1')]
+  if labels is not None:
+    point_cloud.append(labels)
+    point_cloud_types += [('label', 'u1')]
+  point_cloud = np.concatenate(point_cloud, axis=1)
+
+  vertices = [tuple(p) for p in point_cloud]
+  structured_array = np.array(vertices, dtype=point_cloud_types)
+  el = PlyElement.describe(structured_array, 'vertex')
+
+  folder = os.path.dirname(filename)
+  if not os.path.exists(folder):
+    os.makedirs(folder)
+  PlyData([el], text).write(filename)

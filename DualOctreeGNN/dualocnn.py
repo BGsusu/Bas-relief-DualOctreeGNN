@@ -13,6 +13,8 @@ import builder
 import utils
 from solver import Solver, get_config
 
+# # CUDA debug
+# os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
 
 class DualOcnnSolver(Solver):
 
@@ -23,7 +25,7 @@ class DualOcnnSolver(Solver):
     return builder.get_dataset(flags)
 
   def batch_to_cuda(self, batch):
-    keys = ['octree_in', 'octree_gt', 'pos', 'sdf', 'grad', 'weight', 'occu','view_pos']
+    keys = ['octree_in', 'octree_gt', 'pos', 'sdf', 'grad', 'weight', 'occu']
     for key in keys:
       if key in batch:
         batch[key] = batch[key].cuda()
