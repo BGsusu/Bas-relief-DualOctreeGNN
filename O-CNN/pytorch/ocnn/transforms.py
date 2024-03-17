@@ -25,7 +25,7 @@ class Points2Octree:
     self.key2xyz = key2xyz
 
   def __call__(self, points):
-    octree = ocnn.points2octree(points, self.depth, self.full_depth, self.node_dis,
+    octree = ocnn.Point2Octree(points, self.depth, self.full_depth, self.node_dis,
                                 self.node_feature, self.split_label, self.adaptive,
                                 self.adp_depth, self.th_normal, self.th_distance,
                                 self.extrapolate, self.save_pts, self.key2xyz)

@@ -143,7 +143,7 @@ class TransformScanNet:
     points, inbox_mask = ocnn.TransformPoints(**self.flags)(points)
 
     # transform points to octree
-    octree = ocnn.Points2Octree(**self.flags)(points)
+    octree = ocnn.Point2Octree(**self.flags)(points)
     return {'octree': octree, 'points': points, 'inbox_mask': inbox_mask}
 
 

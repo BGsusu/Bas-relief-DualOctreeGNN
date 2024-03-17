@@ -55,7 +55,15 @@ setup(
             include_dirs=include_dirs,
             library_dirs=library_dirs,
             libraries=libraries,
-            extra_compile_args={'cxx': ['-DKEY64']}
+            # Before PyTorch1.8.0, when compiling CUDA code, `cxx` is a
+            # required key passed to PyTorch. Even if there is no flag passed
+            # to cxx, users also need to pass an empty list to PyTorch.
+            # Since PyTorch1.8.0, it has a default value so users do not need
+            # to pass an empty list anymore.
+            # More details at https://github.com/pytorch/pytorch/pull/45956
+            extra_compile_args = {'cxx': []}
+            # extra_compile_args['cxx'] = ['-std=c++17']
+            # extra_compile_args={'cxx': ['-DKEY64']}
         )
     ],
     cmdclass={

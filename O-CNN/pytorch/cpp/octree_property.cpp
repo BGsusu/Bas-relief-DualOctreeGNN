@@ -113,7 +113,7 @@ Tensor octree_property_gpu(Tensor octree_in, string property, int depth) {
   }
 
   else if (property == "node_num") {
-    int num = depth > 0 ? 1 : octree_depth + 1;
+    int num = depth > 0 ? 1 : octree_depth + 1;0
     data_out = torch::zeros({num}, options.dtype(torch::kInt32));
     const int* ptr = octree_.info().node_num_ptr();
     memcpy_gpu(num, ptr + depth, data_out.data_ptr<int>());

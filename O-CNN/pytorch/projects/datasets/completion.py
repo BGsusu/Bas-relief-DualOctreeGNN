@@ -58,7 +58,7 @@ class Noise2cleanTransform:
     self.points_scale = 0.95
     self.noise_std = 0.01 * self.points_scale
 
-    self.points2octree = ocnn.Points2Octree(**flags)
+    self.points2octree = ocnn.Point2Octree(**flags)
 
   def __call__(self, point_cloud, idx):
     # get the input

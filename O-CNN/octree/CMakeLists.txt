@@ -19,7 +19,10 @@ if(USE_CUDA)
   project(Octree LANGUAGES CUDA CXX C)
   add_definitions(-DUSE_CUDA)
   if(${CMAKE_CUDA_COMPILER_VERSION} VERSION_GREATER 11)
-    set(CMAKE_CUDA_STANDARD 14)
+    # defualt 14
+    # set(CMAKE_CUDA_STANDARD 14)
+    # use 17 for 4090 pytorch higher version
+    set(CMAKE_CUDA_STANDARD 17)
   else()
     set(CMAKE_CUDA_STANDARD 11)
   endif()
@@ -33,7 +36,10 @@ endif()
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 # # c++11 Support
-set (CMAKE_CXX_STANDARD 11) 
+# set (CMAKE_CXX_STANDARD 11)
+# change to c++17 for GTX4090 pytorch--2.2 
+set (CMAKE_CXX_STANDARD 17)
+
 set (CMAKE_POSITION_INDEPENDENT_CODE ON)
 if(ABI)
   message(STATUS "octree: _GLIBCXX_USE_CXX11_ABI=0")
@@ -90,6 +96,12 @@ if(USE_OPENMP)
     set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
   endif()
 endif()
+
+# googletest
+if(CMAKE_COMPILER_IS_GNUCC AND CMAKE_COMPILER_IS_GNUCXX)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-error=maybe-uninitialized")
+endif()
+
 
 set(happly_path "${PROJECT_SOURCE_DIR}/external/octree-ext/happly") 
 include_directories(${happly_path})
